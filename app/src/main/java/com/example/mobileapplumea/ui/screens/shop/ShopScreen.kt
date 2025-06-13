@@ -83,7 +83,6 @@ fun ShopScreen(
             productList.filter { product ->
                 // Example: If product had a 'category' property (e.g., product.category.name == selectedCategory.name)
                 // For now, we'll just show all if no proper category filtering is set up in Product data
-                // In a real app, productList would be filtered by a backend or a more robust local data structure
                 true // For now, show all products regardless of category selection on ShopScreen
             }
         }
@@ -328,27 +327,31 @@ private fun LandscapeShopContent(
     onProductClick: (Product) -> Unit,
     onCategoryClick: (Category) -> Unit
 ) {
-    Row(
+    // Changed to LazyColumn for vertical scrolling, with categories at the top
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
             .padding(horizontal = 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(20.dp)
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp) // Spacing between sections
     ) {
-        // Categories column (optional, can be a filter button too)
-        Column(
-            modifier = Modifier
-                .width(150.dp) // Fixed width for categories
-                .fillMaxHeight()
-                .padding(vertical = 8.dp)
-        ) {
+        item {
+            Spacer(modifier = Modifier.height(8.dp)) // Small space after top bar
+
             Text(
-                text = "Categories",
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                text = "Browse Categories",
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                 color = if (darkTheme) Color.White else Color.Black.copy(alpha = 0.9f),
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
             )
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(horizontal = 4.dp)
+            ) {
                 items(categories) { category ->
                     CategoryFilterItem(
                         category = category,
@@ -360,28 +363,31 @@ private fun LandscapeShopContent(
             }
         }
 
-        // Products Grid
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(3), // More columns in landscape
-            modifier = Modifier
-                .weight(1f) // Takes remaining width
-                .fillMaxHeight(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(bottom = 16.dp)
-        ) {
-            item {
-                Text(
-                    text = "All Products",
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                    color = if (darkTheme) Color.White else Color.Black.copy(alpha = 0.9f),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                )
-            }
-            items(products) { product ->
-                ProductCard(product = product, darkTheme = darkTheme, onClick = { onProductClick(product) })
+        item {
+            Text(
+                text = "All Products",
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                color = if (darkTheme) Color.White else Color.Black.copy(alpha = 0.9f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            )
+        }
+
+        // The LazyVerticalGrid now takes available space within the LazyColumn item
+        item {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3), // More columns in landscape
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 300.dp, max = 1200.dp), // Flexible height for the grid itself
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(bottom = 16.dp)
+            ) {
+                items(products) { product ->
+                    ProductCard(product = product, darkTheme = darkTheme, onClick = { onProductClick(product) })
+                }
             }
         }
     }

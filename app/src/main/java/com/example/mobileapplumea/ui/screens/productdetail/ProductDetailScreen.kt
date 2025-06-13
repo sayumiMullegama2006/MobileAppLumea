@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
@@ -49,6 +48,9 @@ fun ProductDetailScreen(
     val priceColor = if (darkTheme) LumeaPinkLight else LumeaPinkDark
     val starColor = Color(0xFFFFA726) // Consistent star color
 
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -56,7 +58,7 @@ fun ProductDetailScreen(
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
-                            Icons.Default.ArrowBack,
+                            Icons.AutoMirrored.Filled.ArrowBack, // Using AutoMirrored for RTL support
                             contentDescription = "Back",
                             tint = if (darkTheme) Color.White else Color.Black
                         )
@@ -71,118 +73,232 @@ fun ProductDetailScreen(
                         )
                     }
                 },
-                // Make TopAppBar transparent to show image underneath
+                // Make TopAppBar transparent to show image underneath in Portrait
+                // In Landscape, it just sits on top of the row.
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         },
         containerColor = backgroundColor // Set background color for the whole screen
     ) { paddingValues ->
-        // Using a Box to layer the image and the content card
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues) // Apply scaffold padding
-        ) {
-            // Product Image (fills the top part)
-            Image(
-                painter = painterResource(id = product.imageResId),
-                contentDescription = product.name,
+        if (isLandscape) {
+            // Landscape Layout: Image on left, scrollable details on right
+            Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(350.dp) // Adjusted height slightly for image dominance
-                    .align(Alignment.TopCenter), // Align to top
-                contentScale = ContentScale.Crop
-            )
-
-            // Content Card (overlaps the image slightly and takes rest of the space)
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter) // Align to bottom
-                    .offset(y = (-30).dp) // Overlap by moving up 30dp
-                    .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)), // Rounded top corners
-                color = backgroundColor, // Background color of the content card
-                shadowElevation = 8.dp // Add shadow for separation
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(
+                // Product Image (left side)
+                Image(
+                    painter = painterResource(id = product.imageResId),
+                    contentDescription = product.name,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 20.dp) // Generous padding
+                        .weight(1f) // Takes half the width
+                        .fillMaxHeight() // Fills available height
+                        .clip(RoundedCornerShape(16.dp)), // Slightly rounded corners for the image
+                    contentScale = ContentScale.Crop
+                )
+
+                // Spacer between image and details
+                Spacer(modifier = Modifier.width(24.dp))
+
+                // Product Details (right side, scrollable)
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1.5f) // Takes more than half the width
+                        .fillMaxHeight(), // Fills available height
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp) // Spacing between elements within the column
                 ) {
-                    // Product Name
-                    Text(
-                        text = product.name,
-                        style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.ExtraBold),
-                        color = textColor,
-                        modifier = Modifier.padding(bottom = 4.dp)
-                    )
-
-                    // Brand Name
-                    Text(
-                        text = product.brand,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = textColor.copy(alpha = 0.7f),
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-
-                    // Price and Rating Row
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = product.price,
-                            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black),
-                            color = priceColor
-                        )
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                Icons.Default.Star,
-                                contentDescription = "Rating",
-                                tint = starColor,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
+                    item {
+                        Column {
+                            // Product Name
                             Text(
-                                text = "${product.rating} (${product.reviewCount} reviews)",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = textColor.copy(alpha = 0.7f)
+                                text = product.name,
+                                style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.ExtraBold),
+                                color = textColor,
+                                modifier = Modifier.padding(bottom = 4.dp)
                             )
+
+                            // Brand Name
+                            Text(
+                                text = product.brand,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = textColor.copy(alpha = 0.7f),
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+
+                            // Price and Rating Row
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = product.price,
+                                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black),
+                                    color = priceColor
+                                )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        Icons.Default.Star,
+                                        contentDescription = "Rating",
+                                        tint = starColor,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = "${product.rating} (${product.reviewCount} reviews)",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = textColor.copy(alpha = 0.7f)
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(24.dp))
+
+                            // Product Description Title
+                            Text(
+                                text = "About this product",
+                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
+                                color = textColor,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                            // Product Description
+                            Text(
+                                text = product.description,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = textColor.copy(alpha = 0.8f),
+                                modifier = Modifier.padding(bottom = 24.dp)
+                            )
+
+                            // Add to Cart Button
+                            Button(
+                                onClick = { onAddToCartClick(product) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(56.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = priceColor),
+                                shape = RoundedCornerShape(16.dp) // More rounded button
+                            ) {
+                                Text(
+                                    text = "Add to Cart",
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = Color.White
+                                )
+                            }
                         }
                     }
+                }
+            }
+        } else {
+            // Portrait Layout (existing code, wrapped in Box with padding)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues) // Apply scaffold padding
+            ) {
+                // Product Image (fills the top part)
+                Image(
+                    painter = painterResource(id = product.imageResId),
+                    contentDescription = product.name,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(350.dp) // Adjusted height slightly for image dominance
+                        .align(Alignment.TopCenter), // Align to top
+                    contentScale = ContentScale.Crop
+                )
 
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // Product Description Title
-                    Text(
-                        text = "About this product",
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
-                        color = textColor,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    // Product Description
-                    Text(
-                        text = product.description,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = textColor.copy(alpha = 0.8f),
-                        modifier = Modifier.padding(bottom = 24.dp)
-                    )
-
-                    // Add to Cart Button
-                    Button(
-                        onClick = { onAddToCartClick(product) },
+                // Content Card (overlaps the image slightly and takes rest of the space)
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter) // Align to bottom
+                        .offset(y = (-30).dp) // Overlap by moving up 30dp
+                        .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)), // Rounded top corners
+                    color = backgroundColor, // Background color of the content card
+                    shadowElevation = 8.dp // Add shadow for separation
+                ) {
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(56.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = priceColor),
-                        shape = RoundedCornerShape(16.dp) // More rounded button
+                            .padding(horizontal = 24.dp, vertical = 20.dp) // Generous padding
                     ) {
+                        // Product Name
                         Text(
-                            text = "Add to Cart",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                            color = Color.White
+                            text = product.name,
+                            style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.ExtraBold),
+                            color = textColor,
+                            modifier = Modifier.padding(bottom = 4.dp)
                         )
+
+                        // Brand Name
+                        Text(
+                            text = product.brand,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = textColor.copy(alpha = 0.7f),
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+
+                        // Price and Rating Row
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = product.price,
+                                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black),
+                                color = priceColor
+                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    Icons.Default.Star,
+                                    contentDescription = "Rating",
+                                    tint = starColor,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "${product.rating} (${product.reviewCount} reviews)",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = textColor.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        // Product Description Title
+                        Text(
+                            text = "About this product",
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
+                            color = textColor,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        // Product Description
+                        Text(
+                            text = product.description,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = textColor.copy(alpha = 0.8f),
+                            modifier = Modifier.padding(bottom = 24.dp)
+                        )
+
+                        // Add to Cart Button
+                        Button(
+                            onClick = { onAddToCartClick(product) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = priceColor),
+                            shape = RoundedCornerShape(16.dp) // More rounded button
+                        ) {
+                            Text(
+                                text = "Add to Cart",
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = Color.White
+                            )
+                        }
                     }
                 }
             }

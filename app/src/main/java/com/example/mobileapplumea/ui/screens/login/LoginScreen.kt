@@ -60,22 +60,24 @@ fun LoginScreen(
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     val darkTheme = isSystemInDarkTheme()
 
-    // Revised radial gradient for a "professional mixture" and subtle glow
+    // Revised radial gradient for a "mist gradient" and subtle glow
     val backgroundBrush = if (darkTheme) {
         Brush.radialGradient(
             colors = listOf(
-                Color(0xFF3B2F3F), // Slightly warmer, muted dark pink/purple for center glow
+                Color(0xFF5A4A5E), // A desaturated, muted purple-pink for a misty center glow
+                Color(0xFF3B2F3F), // Fades to a slightly darker, muted tone
                 LumeaBackgroundDark // Fades to the standard dark background
             ),
-            radius = 1200f // Larger radius for a softer, broader glow
+            radius = 1600f // Larger radius for a softer, broader, more ethereal glow
         )
     } else {
         Brush.radialGradient(
             colors = listOf(
-                Color(0xFFFBF4F8), // Very light, almost white pink for center
-                LumeaBackgroundLight // Fades to the standard light background
+                Color(0xFFFFFFFF), // Pure white or very, very light desaturated pink for the very center
+                Color(0xFFF0E0E5), // A very light, desaturated pink for a misty effect
+                LumeaBackgroundLight // Fades to the standard light background color
             ),
-            radius = 1200f // Larger radius for a softer, broader glow
+            radius = 1600f // Larger radius for a softer, broader, more ethereal glow
         )
     }
 

@@ -87,16 +87,7 @@ fun FavoritesScreen(
                     }
                 },
                 actions = {
-                    // Search icon from image
-                    IconButton(onClick = { /* TODO: Implement search */ }) {
-                        Icon(
-                            Icons.Default.ShoppingCart, // Replaced search with cart as per your top bar in home
-                            contentDescription = "Search",
-                            tint = iconTint,
-                            modifier = Modifier.size(28.dp)
-                        )
-                    }
-                    // Cart icon from image
+                    // ONLY one Shopping Cart icon (the one that navigates to cart)
                     IconButton(onClick = onCartClick) {
                         Icon(
                             Icons.Default.ShoppingCart,

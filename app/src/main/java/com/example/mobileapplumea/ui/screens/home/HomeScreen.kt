@@ -52,6 +52,9 @@ import com.example.mobileapplumea.data.Category
 import com.example.mobileapplumea.data.productList
 import com.example.mobileapplumea.data.categories
 import com.example.mobileapplumea.data.bannerImageResId
+import androidx.compose.ui.graphics.graphicsLayer // Import graphicsLayer
+import androidx.compose.ui.unit.IntOffset // Import IntOffset
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -129,17 +132,34 @@ private fun HomeTopBar(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // App Name 'Lumea' - STYLISH TEXT
-                Text(
-                    text = "LUMEA",
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        fontWeight = FontWeight.Black,
-                        fontSize = 32.sp,
-                        // fontFamily = FontFamily(Font(R.font.your_custom_font)) // Uncomment and add your custom font here
-                    ),
-                    color = if (darkTheme) LumeaPinkLight else LumeaPinkDark,
-                    modifier = Modifier.padding(end = 8.dp)
-                )
+                // App Name 'Lumea' - STYLISH TEXT with Shadow (updated)
+                Box(
+                    modifier = Modifier.wrapContentSize(align = Alignment.Center)
+                ) {
+                    Text(
+                        text = "LUMEA",
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontWeight = FontWeight.Black,
+                            fontSize = 24.sp // Adjusted font size
+                        ),
+                        color = LumeaPinkLight.copy(alpha = 0.5f), // Shadow color
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .graphicsLayer {
+                                translationX = 2.dp.toPx()
+                                translationY = 2.dp.toPx()
+                            }
+                    )
+                    Text(
+                        text = "LUMEA",
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontWeight = FontWeight.Black,
+                            fontSize = 24.sp // Adjusted font size
+                        ),
+                        color = if (darkTheme) LumeaPinkLight else LumeaPinkDark, // Main text color, adjusting for theme
+                        textAlign = TextAlign.Center
+                    )
+                }
 
                 // Search Bar
                 var searchText by remember { mutableStateOf("") }
@@ -159,9 +179,8 @@ private fun HomeTopBar(
                     },
                     modifier = Modifier
                         .weight(1f)
-                        .height(48.dp)
-                        .clip(RoundedCornerShape(24.dp))
-                        .clickable { onSearchClick(searchText) },
+                        .padding(horizontal = 8.dp) // Added padding for spacing
+                        .clickable { onSearchClick(searchText) }, // Clickable to trigger search
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = searchBarBackgroundColor,
@@ -173,7 +192,12 @@ private fun HomeTopBar(
                         focusedTextColor = searchBarContentColor,
                         unfocusedTextColor = searchBarContentColor,
                         focusedLeadingIconColor = searchBarHintColor,
-                        unfocusedLeadingIconColor = searchBarHintColor
+                        unfocusedLeadingIconColor = searchBarHintColor,
+                        // Ensure text styles are handled by the MaterialTheme defaults
+                        // Or explicitly set them if you need custom fonts/sizes
+                    ),
+                    textStyle = LocalTextStyle.current.copy(
+                        fontSize = 16.sp // Explicitly set text size if needed to control vertical space
                     )
                 )
 
@@ -252,17 +276,22 @@ private fun PortraitHomeContent(
             )
         }
         item {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
+            // Using a Box to give LazyVerticalGrid a constrained height within LazyColumn
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(550.dp), // Adjust height as needed, or make it flexible
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(bottom = 16.dp)
+                    .height(650.dp) // Increased height to allow more products to show
             ) {
-                items(productList) { product ->
-                    ProductCard(product = product, darkTheme = darkTheme, onClick = { onProductClick(product) })
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.fillMaxSize(), // Fill the Box's height
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(bottom = 16.dp)
+                ) {
+                    items(productList) { product ->
+                        ProductCard(product = product, darkTheme = darkTheme, onClick = { onProductClick(product) })
+                    }
                 }
             }
         }
@@ -323,17 +352,21 @@ private fun LandscapeHomeContent(
         }
         item {
             val columns = if (LocalConfiguration.current.screenWidthDp > 800) 4 else 3
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(columns),
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(600.dp), // Adjust height as needed
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(bottom = 16.dp)
+                    .height(600.dp) // Retained for landscape
             ) {
-                items(productList) { product ->
-                    ProductCard(product = product, darkTheme = darkTheme, onClick = { onProductClick(product) })
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(columns),
+                    modifier = Modifier.fillMaxSize(), // Fill the Box's height
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(bottom = 16.dp)
+                ) {
+                    items(productList) { product ->
+                        ProductCard(product = product, darkTheme = darkTheme, onClick = { onProductClick(product) })
+                    }
                 }
             }
         }
@@ -371,15 +404,15 @@ fun PromotionalBanner(darkTheme: Boolean, isLandscape: Boolean = false, bannerIm
                     .background(scrimBrush)
             )
 
+            // Content within the banner (Shop Now button remains)
             if (isLandscape) {
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceAround
+                    horizontalArrangement = Arrangement.Center // Center horizontally
                 ) {
-
                     Button(
                         onClick = { /* Handle Shop Now */ },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = LumeaPinkDark),
@@ -396,16 +429,7 @@ fun PromotionalBanner(darkTheme: Boolean, isLandscape: Boolean = false, bannerIm
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Text(
-                        text = "Unlock Your Beauty Potential!\nSave up to 40% on premium skincare.",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp
-                        ),
-                        color = Color.White,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
+                    // Removed the "Unlock Your Beauty Potential!" text and its modifier
                     Button(
                         onClick = { /* Handle Shop Now */ },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = LumeaPinkDark),
@@ -471,7 +495,7 @@ fun ProductCard(product: Product, darkTheme: Boolean, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(220.dp) // Adjusted height slightly to accommodate more info
+            .wrapContentHeight() // Allow card to wrap its content's height
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = cardBackgroundColor),
@@ -479,19 +503,25 @@ fun ProductCard(product: Product, darkTheme: Boolean, onClick: () -> Unit) {
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth() // Fill width of the card
                 .padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
-                painter = painterResource(id = product.imageResId),
-                contentDescription = product.name,
+            // Image takes up a significant portion of the card
+            Box(
                 modifier = Modifier
-                    .weight(1f) // Takes available space
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
-            )
+                    .aspectRatio(1f) // Ensure image box is square
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(if(darkTheme) Color.Gray.copy(alpha = 0.1f) else Color.LightGray.copy(alpha = 0.1f)) // A subtle background for the image area
+            ) {
+                Image(
+                    painter = painterResource(id = product.imageResId),
+                    contentDescription = product.name,
+                    modifier = Modifier.fillMaxSize(), // Fill the square box
+                    contentScale = ContentScale.Fit // Ensures the entire image is visible
+                )
+            }
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = product.name,

@@ -1,5 +1,6 @@
 package com.example.mobileapplumea.ui.screens.payment
 
+import androidx.compose.foundation.BorderStroke
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
@@ -35,7 +36,7 @@ import com.example.mobileapplumea.ui.theme.LumeaOnBackgroundDark // Import neces
 import com.example.mobileapplumea.ui.theme.LumeaOnBackgroundLight // Import necessary for light theme text
 import com.example.mobileapplumea.ui.theme.LumeaSurfaceDark // Import necessary for dark theme surface
 import com.example.mobileapplumea.ui.theme.LumeaSurfaceLight // Import necessary for light theme surface
-import androidx.compose.ui.graphics.SolidColor // NEW IMPORT for BorderStroke color
+import androidx.compose.ui.text.style.TextAlign // For dialog text alignment
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,12 +53,17 @@ fun PaymentScreen(
     val textColor = if (darkTheme) LumeaOnBackgroundDark else LumeaOnBackgroundLight // Use theme onBackground color for general text
     val buttonColor = if (darkTheme) LumeaPinkDark else LumeaPinkDark // Assuming LumeaPinkDark is the main button color for both. Adjust if you prefer LumeaPinkLight for dark theme buttons.
     val iconTint = if (darkTheme) LumeaOnBackgroundDark else LumeaOnBackgroundLight // Icon tint should match text color
-    val checkedColor = if (darkTheme) LumeaPinkLight else LumeaPinkDark // Color for the checkmark/checkbox
+    val checkedColor = if (darkTheme) LumeaPinkLight else LumeaPinkDark // Color for the checkmark/checkbox for selection/success
 
     // State to control the visibility of the success dialog
     var showSuccessDialog by remember { mutableStateOf(false) }
 
-    val scrollState = rememberScrollState() // For vertical scrolling in landscape
+    val scrollState = rememberScrollState() // For vertical scrolling
+
+    // Dummy values for order summary (replace with real data from your cart/order ViewModel)
+    val subtotal = 15000.00
+    val shipping = 500.00
+    val totalAmount = subtotal + shipping
 
     Scaffold(
         topBar = {
@@ -96,7 +102,7 @@ fun PaymentScreen(
             // Delivery Address Section
             Text(
                 text = "DELIVERY ADDRESS",
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.titleSmall, // Adjusted size
                 color = textColor.copy(alpha = 0.6f),
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -117,13 +123,14 @@ fun PaymentScreen(
                     Column {
                         Text(
                             text = "HOME ADDRESS",
-                            style = MaterialTheme.typography.bodyLarge,
+                            style = MaterialTheme.typography.bodyLarge, // Keep this relatively prominent
                             fontWeight = FontWeight.Bold,
                             color = textColor
                         )
                         Text(
-                            text = "928 Lehner Junction Apt. 047",
-                            style = MaterialTheme.typography.bodyMedium,
+                            // Sri Lankan Address
+                            text = "No. 123, Galle Road,\nColombo 03, Sri Lanka",
+                            style = MaterialTheme.typography.bodyMedium, // Adjusted size
                             color = textColor.copy(alpha = 0.8f)
                         )
                     }
@@ -141,7 +148,7 @@ fun PaymentScreen(
             // Payment Method Section
             Text(
                 text = "PAYMENT METHOD",
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.titleSmall, // Adjusted size
                 color = textColor.copy(alpha = 0.6f),
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -161,9 +168,9 @@ fun PaymentScreen(
             // PayPal
             PaymentMethodCard(
                 iconRes = R.drawable.paypal_logo, // Replace with your actual PayPal logo drawable
-                methodName = "wilson.casper@bernice.info",
-                cardNumber = "", // Email instead of card number
-                isSelected = true,
+                methodName = "PayPal",
+                cardNumber = "wilson.casper@bernice.info", // Email instead of card number
+                isSelected = false, // Set to false to show difference
                 surfaceColor = surfaceColor,
                 textColor = textColor,
                 checkedColor = checkedColor
@@ -173,15 +180,34 @@ fun PaymentScreen(
             // Other Card
             PaymentMethodCard(
                 iconRes = R.drawable.mastercard_logo, // Replace with your actual Mastercard logo drawable
-                methodName = "•••• •••• 3461",
-                cardNumber = "",
+                methodName = "Mastercard",
+                cardNumber = "**** **** 3461",
                 isSelected = false,
                 surfaceColor = surfaceColor,
                 textColor = textColor,
                 checkedColor = checkedColor
             )
 
-            Spacer(modifier = Modifier.weight(1f)) // Pushes content to top
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Order Summary Section
+            Text(
+                text = "ORDER SUMMARY",
+                style = MaterialTheme.typography.titleSmall, // Adjusted size
+                color = textColor.copy(alpha = 0.6f),
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            OrderSummaryCard(
+                subtotal = subtotal,
+                shipping = shipping,
+                totalAmount = totalAmount,
+                surfaceColor = surfaceColor,
+                textColor = textColor,
+                priceColor = checkedColor // Using checkedColor for accent prices
+            )
+
+            Spacer(modifier = Modifier.weight(1f)) // Pushes content to top, creating flexible space
 
             // Payment Button
             Button(
@@ -201,7 +227,6 @@ fun PaymentScreen(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            // Removed "Pay with Touch ID" section as requested
         }
     }
 
@@ -240,8 +265,7 @@ fun PaymentMethodCard(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = surfaceColor),
         shape = RoundedCornerShape(12.dp),
-        // FIX: Use SolidColor for the brush parameter instead of 'color'
-        border = if (isSelected) ButtonDefaults.outlinedButtonBorder.copy(brush = SolidColor(checkedColor)) else null,
+        border = if (isSelected) BorderStroke(2.dp, checkedColor) else null, // Use BorderStroke directly
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -287,6 +311,90 @@ fun PaymentMethodCard(
 }
 
 @Composable
+fun OrderSummaryCard(
+    subtotal: Double,
+    shipping: Double,
+    totalAmount: Double,
+    surfaceColor: Color,
+    textColor: Color,
+    priceColor: Color
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = surfaceColor),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Subtotal
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Subtotal",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = textColor.copy(alpha = 0.8f)
+                )
+                Text(
+                    text = "LKR ${"%.2f".format(subtotal)}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = textColor
+                )
+            }
+            // Shipping
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Shipping",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = textColor.copy(alpha = 0.8f)
+                )
+                Text(
+                    text = "LKR ${"%.2f".format(shipping)}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = textColor
+                )
+            }
+            Divider(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                color = textColor.copy(alpha = 0.1f),
+                thickness = 1.dp
+            )
+            // Total
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Total",
+                    style = MaterialTheme.typography.titleLarge, // Larger for total
+                    fontWeight = FontWeight.Bold,
+                    color = textColor
+                )
+                Text(
+                    text = "LKR ${"%.2f".format(totalAmount)}",
+                    style = MaterialTheme.typography.titleLarge, // Larger for total amount
+                    fontWeight = FontWeight.ExtraBold,
+                    color = priceColor // Highlight total amount
+                )
+            }
+        }
+    }
+}
+
+
+@Composable
 fun OrderSuccessDialog(
     onDismissRequest: () -> Unit,
     onContinueShoppingClick: () -> Unit,
@@ -300,8 +408,7 @@ fun OrderSuccessDialog(
     Dialog(onDismissRequest = onDismissRequest) {
         Card(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(IntrinsicSize.Min), // Allow content to dictate height
+                .fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(containerColor = surfaceColor),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
@@ -321,16 +428,17 @@ fun OrderSuccessDialog(
                 )
                 Text(
                     text = "Your order is successfully.",
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.titleLarge, // Adjusted size
                     fontWeight = FontWeight.Bold,
                     color = textColor,
-                    lineHeight = 30.sp // Adjust line height if needed
+                    textAlign = TextAlign.Center, // Center text
+                    lineHeight = 32.sp // Adjust line height for better readability if needed
                 )
                 Text(
                     text = "You can track the delivery in the 'Orders' section.",
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodyMedium, // Adjusted size
                     color = textColor.copy(alpha = 0.8f),
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    textAlign = TextAlign.Center
                 )
 
                 Spacer(modifier = Modifier.height(16.dp)) // Spacer before buttons
@@ -425,7 +533,6 @@ fun PaymentScreenLandscapeDarkPreview() {
 @Composable
 fun OrderSuccessDialogLightPreview() {
     MobileAppLumeaTheme(darkTheme = false) {
-        // You might want to wrap this in a Box or Surface for better preview rendering
         Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
             OrderSuccessDialog(
                 onDismissRequest = {},
