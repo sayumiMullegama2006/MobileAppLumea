@@ -124,6 +124,7 @@ private fun HomeTopBar(
     val searchBarBackgroundColor = if (darkTheme) Color.Gray.copy(alpha = 0.2f) else LumeaPinkLight.copy(alpha = 0.3f)
     val searchBarContentColor = if (darkTheme) Color.White else Color.Black
     val searchBarHintColor = if (darkTheme) Color.LightGray else Color.Gray
+    val searchBarBorderColor = if (darkTheme) Color.Gray.copy(alpha = 0.5f) else LumeaPinkLight // Subtle border
 
     TopAppBar(
         title = {
@@ -132,7 +133,7 @@ private fun HomeTopBar(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // App Name 'Lumea' - STYLISH TEXT with Shadow (updated)
+                // App Name 'Lumea' - STYLISH TEXT with Shadow
                 Box(
                     modifier = Modifier.wrapContentSize(align = Alignment.Center)
                 ) {
@@ -140,7 +141,7 @@ private fun HomeTopBar(
                         text = "LUMEA",
                         style = MaterialTheme.typography.headlineMedium.copy(
                             fontWeight = FontWeight.Black,
-                            fontSize = 24.sp // Adjusted font size
+                            fontSize = 24.sp
                         ),
                         color = LumeaPinkLight.copy(alpha = 0.5f), // Shadow color
                         textAlign = TextAlign.Center,
@@ -154,7 +155,7 @@ private fun HomeTopBar(
                         text = "LUMEA",
                         style = MaterialTheme.typography.headlineMedium.copy(
                             fontWeight = FontWeight.Black,
-                            fontSize = 24.sp // Adjusted font size
+                            fontSize = 24.sp
                         ),
                         color = if (darkTheme) LumeaPinkLight else LumeaPinkDark, // Main text color, adjusting for theme
                         textAlign = TextAlign.Center
@@ -179,25 +180,24 @@ private fun HomeTopBar(
                     },
                     modifier = Modifier
                         .weight(1f)
-                        .padding(horizontal = 8.dp) // Added padding for spacing
-                        .clickable { onSearchClick(searchText) }, // Clickable to trigger search
+                        .padding(horizontal = 8.dp)
+                        .clip(RoundedCornerShape(24.dp)) // Ensures rounded corners are applied
+                        .clickable { onSearchClick(searchText) },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = searchBarBackgroundColor,
                         unfocusedContainerColor = searchBarBackgroundColor,
                         disabledContainerColor = searchBarBackgroundColor,
                         cursorColor = searchBarContentColor,
-                        focusedBorderColor = Color.Transparent,
-                        unfocusedBorderColor = Color.Transparent,
+                        focusedBorderColor = searchBarBorderColor, // Added subtle border
+                        unfocusedBorderColor = searchBarBorderColor, // Added subtle border
                         focusedTextColor = searchBarContentColor,
                         unfocusedTextColor = searchBarContentColor,
                         focusedLeadingIconColor = searchBarHintColor,
-                        unfocusedLeadingIconColor = searchBarHintColor,
-                        // Ensure text styles are handled by the MaterialTheme defaults
-                        // Or explicitly set them if you need custom fonts/sizes
+                        unfocusedLeadingIconColor = searchBarHintColor
                     ),
                     textStyle = LocalTextStyle.current.copy(
-                        fontSize = 16.sp // Explicitly set text size if needed to control vertical space
+                        fontSize = 16.sp // Ensure text size is reasonable for the field
                     )
                 )
 
@@ -238,16 +238,19 @@ private fun PortraitHomeContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        // Promotional Banner
+        // Promotional Banner - A spacer is added here for spacing from the TopBar
         item {
+            Spacer(modifier = Modifier.height(16.dp)) // Space after top bar
             PromotionalBanner(darkTheme = darkTheme, bannerImageResId = bannerImageResId)
         }
 
         // Categories Section
         item {
             Text(
-                text = "Explore Categories",
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                text = "Categories", // Changed to "Categories"
+                style = MaterialTheme.typography.titleLarge.copy( // Using titleLarge for smaller, normal font
+                    fontWeight = FontWeight.Bold
+                ),
                 color = if (darkTheme) Color.White else Color.Black.copy(alpha = 0.9f),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -267,8 +270,10 @@ private fun PortraitHomeContent(
         // Products Section
         item {
             Text(
-                text = "Popular Picks",
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                text = "Popular", // Changed to "Popular"
+                style = MaterialTheme.typography.titleLarge.copy( // Using titleLarge for smaller, normal font
+                    fontWeight = FontWeight.Bold
+                ),
                 color = if (darkTheme) Color.White else Color.Black.copy(alpha = 0.9f),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -276,15 +281,14 @@ private fun PortraitHomeContent(
             )
         }
         item {
-            // Using a Box to give LazyVerticalGrid a constrained height within LazyColumn
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(650.dp) // Increased height to allow more products to show
+                    .height(650.dp)
             ) {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
-                    modifier = Modifier.fillMaxSize(), // Fill the Box's height
+                    modifier = Modifier.fillMaxSize(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     contentPadding = PaddingValues(bottom = 16.dp)
@@ -313,16 +317,19 @@ private fun LandscapeHomeContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        // Promotional Banner
+        // Promotional Banner - A spacer is added here for spacing from the TopBar
         item {
+            Spacer(modifier = Modifier.height(16.dp)) // Space after top bar
             PromotionalBanner(darkTheme = darkTheme, isLandscape = true, bannerImageResId = bannerImageResId)
         }
 
         // Categories Section
         item {
             Text(
-                text = "Explore Categories",
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                text = "Categories", // Changed to "Categories"
+                style = MaterialTheme.typography.titleLarge.copy( // Using titleLarge for smaller, normal font
+                    fontWeight = FontWeight.Bold
+                ),
                 color = if (darkTheme) Color.White else Color.Black.copy(alpha = 0.9f),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -342,8 +349,10 @@ private fun LandscapeHomeContent(
         // Products Section
         item {
             Text(
-                text = "Popular Picks",
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                text = "Popular", // Changed to "Popular"
+                style = MaterialTheme.typography.titleLarge.copy( // Using titleLarge for smaller, normal font
+                    fontWeight = FontWeight.Bold
+                ),
                 color = if (darkTheme) Color.White else Color.Black.copy(alpha = 0.9f),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -355,11 +364,11 @@ private fun LandscapeHomeContent(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(600.dp) // Retained for landscape
+                    .height(600.dp)
             ) {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(columns),
-                    modifier = Modifier.fillMaxSize(), // Fill the Box's height
+                    modifier = Modifier.fillMaxSize(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     contentPadding = PaddingValues(bottom = 16.dp)
@@ -411,7 +420,7 @@ fun PromotionalBanner(darkTheme: Boolean, isLandscape: Boolean = false, bannerIm
                         .fillMaxSize()
                         .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center // Center horizontally
+                    horizontalArrangement = Arrangement.Center
                 ) {
                     Button(
                         onClick = { /* Handle Shop Now */ },
@@ -429,7 +438,6 @@ fun PromotionalBanner(darkTheme: Boolean, isLandscape: Boolean = false, bannerIm
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    // Removed the "Unlock Your Beauty Potential!" text and its modifier
                     Button(
                         onClick = { /* Handle Shop Now */ },
                         colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = LumeaPinkDark),
@@ -458,18 +466,16 @@ fun CategoryItem(category: Category, darkTheme: Boolean, onClick: () -> Unit) {
             modifier = Modifier
                 .size(64.dp)
                 .clip(CircleShape),
-            color = Color.Transparent, // Make Surface color transparent
+            color = Color.Transparent,
             shadowElevation = 2.dp
         ) {
-            // The Image now takes up the full size of the Surface and is clipped by the Surface's CircleShape
             Image(
                 painter = painterResource(id = category.imageResId),
                 contentDescription = category.name,
                 modifier = Modifier
-                    .fillMaxSize() // Make the image fill the entire Surface area
-                    .clip(CircleShape), // Ensure the image itself is clipped to a circle
-                contentScale = ContentScale.Crop // Use Crop to fill and maintain aspect ratio.
-                // If you want it to stretch/squish to fit the circle, use ContentScale.FillBounds
+                    .fillMaxSize()
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
@@ -495,7 +501,7 @@ fun ProductCard(product: Product, darkTheme: Boolean, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .wrapContentHeight() // Allow card to wrap its content's height
+            .wrapContentHeight()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = cardBackgroundColor),
@@ -503,23 +509,22 @@ fun ProductCard(product: Product, darkTheme: Boolean, onClick: () -> Unit) {
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth() // Fill width of the card
+                .fillMaxWidth()
                 .padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Image takes up a significant portion of the card
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1f) // Ensure image box is square
+                    .aspectRatio(1f)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(if(darkTheme) Color.Gray.copy(alpha = 0.1f) else Color.LightGray.copy(alpha = 0.1f)) // A subtle background for the image area
+                    .background(if(darkTheme) Color.Gray.copy(alpha = 0.1f) else Color.LightGray.copy(alpha = 0.1f))
             ) {
                 Image(
                     painter = painterResource(id = product.imageResId),
                     contentDescription = product.name,
-                    modifier = Modifier.fillMaxSize(), // Fill the square box
-                    contentScale = ContentScale.Fit // Ensures the entire image is visible
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit
                 )
             }
             Spacer(modifier = Modifier.height(4.dp))
@@ -532,7 +537,7 @@ fun ProductCard(product: Product, darkTheme: Boolean, onClick: () -> Unit) {
                 textAlign = TextAlign.Center
             )
             Text(
-                text = product.brand, // Added brand
+                text = product.brand,
                 style = MaterialTheme.typography.bodySmall,
                 color = textColor.copy(alpha = 0.7f),
                 maxLines = 1,
@@ -590,10 +595,9 @@ fun HomeBottomNavBar(
         containerColor = if (darkTheme) LumeaBackgroundDark else LumeaBackgroundLight,
         tonalElevation = 4.dp
     ) {
-        // Define items to avoid repetition
         val items = listOf(
             BottomNavItem("Home", Icons.Default.Home, "Home"),
-            BottomNavItem("Shop", Icons.Default.Store, "Shop"), // Changed icon to Store
+            BottomNavItem("Shop", Icons.Default.Store, "Shop"),
             BottomNavItem("Favorites", Icons.Default.Favorite, "Favorites"),
             BottomNavItem("Profile", Icons.Default.Person, "Profile")
         )
@@ -608,7 +612,7 @@ fun HomeBottomNavBar(
                     when (item.route) {
                         "Home" -> onHomeTabClick()
                         "Shop" -> onShopTabClick()
-                        "Favorites" -> onFavoritesTabClick() // This is the navigation trigger
+                        "Favorites" -> onFavoritesTabClick()
                         "Profile" -> onProfileTabClick()
                     }
                 },
@@ -624,10 +628,8 @@ fun HomeBottomNavBar(
     }
 }
 
-// Data class for Bottom Navigation Items
 data class BottomNavItem(val label: String, val icon: ImageVector, val route: String)
 
-// Previews (remain unchanged)
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL)
 @Composable
 fun HomeScreenPreviewLight() {

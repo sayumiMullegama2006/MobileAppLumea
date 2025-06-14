@@ -140,7 +140,7 @@ fun FavoritesScreen(
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
                 items(favoriteProducts) { product ->
-                    FavoriteProductListItem( // Use the new list item composable
+                    FavoriteProductListItem(
                         product = product,
                         darkTheme = darkTheme,
                         onProductClick = { onProductClick(product) },
@@ -152,11 +152,7 @@ fun FavoritesScreen(
     }
 }
 
-// Re-using the ProductCard for grid display is good, but for the list, we need a new one.
-// The new FavoriteProductListItem composable should be defined outside or inside FavoritesScreen,
-// but preferably outside for reusability if needed elsewhere.
-// Here's the FavoriteProductListItem composable. You can place it directly below FavoritesScreen
-// or in a separate file as mentioned.
+
 
 @Composable
 fun FavoriteProductListItem(
@@ -282,7 +278,6 @@ fun FavoriteProductListItem(
                 )
             }
 
-            // Favorite Icon (always solid as it's a favorites list)
             IconButton(onClick = { onToggleFavorite(product) }) {
                 Icon(
                     imageVector = Icons.Default.Favorite,

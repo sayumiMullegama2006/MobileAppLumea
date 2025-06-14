@@ -37,6 +37,12 @@ import com.example.mobileapplumea.ui.theme.LumeaPinkDarkPrimary
 import com.example.mobileapplumea.ui.theme.LumeaPinkLight
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.platform.LocalConfiguration // Import for LocalConfiguration
+import androidx.compose.material.icons.filled.Visibility // Import Visibility icon
+import androidx.compose.material.icons.filled.VisibilityOff // Import VisibilityOff icon
+import androidx.compose.foundation.rememberScrollState // Import for scroll state
+import androidx.compose.foundation.verticalScroll // Import for vertical scroll
+import androidx.compose.ui.text.input.VisualTransformation
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,6 +78,7 @@ fun SignupScreen(
     var usernameOrEmail by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
+    var isAgreed by remember { mutableStateOf(false) } // State for the checkbox
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -83,26 +90,30 @@ fun SignupScreen(
                 .background(backgroundBrush)
         ) {
             if (isLandscape) {
-                LandscapeSignupContent( // <--- Using Landscape content for landscape orientation
+                LandscapeSignupContent(
                     usernameOrEmail = usernameOrEmail,
                     onUsernameOrEmailChange = { usernameOrEmail = it },
                     password = password,
                     onPasswordChange = { password = it },
                     confirmPassword = confirmPassword,
                     onConfirmPasswordChange = { confirmPassword = it },
+                    isAgreed = isAgreed,
+                    onAgreedChange = { isAgreed = it },
                     onRegisterClick = onRegisterClick,
                     onGoogleSignInClick = onGoogleSignInClick,
                     onFacebookSignInClick = onFacebookSignInClick,
                     onLoginClick = onLoginClick
                 )
             } else {
-                PortraitSignupContent( // <--- Using Portrait content for portrait orientation
+                PortraitSignupContent(
                     usernameOrEmail = usernameOrEmail,
                     onUsernameOrEmailChange = { usernameOrEmail = it },
                     password = password,
                     onPasswordChange = { password = it },
                     confirmPassword = confirmPassword,
                     onConfirmPasswordChange = { confirmPassword = it },
+                    isAgreed = isAgreed,
+                    onAgreedChange = { isAgreed = it },
                     onRegisterClick = onRegisterClick,
                     onGoogleSignInClick = onGoogleSignInClick,
                     onFacebookSignInClick = onFacebookSignInClick,
@@ -122,6 +133,8 @@ private fun PortraitSignupContent(
     onPasswordChange: (String) -> Unit,
     confirmPassword: String,
     onConfirmPasswordChange: (String) -> Unit,
+    isAgreed: Boolean, // Added isAgreed state
+    onAgreedChange: (Boolean) -> Unit, // Added onAgreedChange callback
     onRegisterClick: () -> Unit,
     onGoogleSignInClick: () -> Unit,
     onFacebookSignInClick: () -> Unit,
@@ -138,10 +151,15 @@ private fun PortraitSignupContent(
     val inputPlaceholderColor = if (darkTheme) Color.LightGray.copy(alpha = 0.7f) else Color.Gray.copy(alpha = 0.7f)
     val inputLabelColor = if (darkTheme) Color.White.copy(alpha = 0.8f) else Color.Gray.copy(alpha = 0.8f)
 
+    // State for password visibility
+    var passwordVisible by remember { mutableStateOf(false) }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 32.dp, vertical = 24.dp),
+            .padding(horizontal = 32.dp, vertical = 24.dp)
+            .verticalScroll(rememberScrollState()), // Make it scrollable
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -185,13 +203,13 @@ private fun PortraitSignupContent(
             )
         )
 
-        // Password Input Field
+        // Password Input Field with eye toggle
         OutlinedTextField(
             value = password,
             onValueChange = onPasswordChange,
             label = { Text("Password") },
             leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password Icon", tint = inputTextColor) },
-            visualTransformation = PasswordVisualTransformation(),
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             singleLine = true,
             modifier = Modifier
@@ -212,16 +230,25 @@ private fun PortraitSignupContent(
                 unfocusedLabelColor = inputPlaceholderColor,
                 focusedLeadingIconColor = inputTextColor,
                 unfocusedLeadingIconColor = inputTextColor
-            )
+            ),
+            trailingIcon = {
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(
+                        imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                        contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                        tint = inputTextColor
+                    )
+                }
+            }
         )
 
-        // Confirm Password Input Field
+        // Confirm Password Input Field with eye toggle
         OutlinedTextField(
             value = confirmPassword,
             onValueChange = onConfirmPasswordChange,
             label = { Text("Confirm Password") },
             leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Confirm Password Icon", tint = inputTextColor) },
-            visualTransformation = PasswordVisualTransformation(),
+            visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             singleLine = true,
             modifier = Modifier
@@ -242,33 +269,61 @@ private fun PortraitSignupContent(
                 unfocusedLabelColor = inputPlaceholderColor,
                 focusedLeadingIconColor = inputTextColor,
                 unfocusedLeadingIconColor = inputTextColor
+            ),
+            trailingIcon = {
+                IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                    Icon(
+                        imageVector = if (confirmPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                        contentDescription = if (confirmPasswordVisible) "Hide confirm password" else "Show confirm password",
+                        tint = inputTextColor
+                    )
+                }
+            }
+        )
+
+        // Agreement Checkbox and Text
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start // Align to start
+        ) {
+            Checkbox(
+                checked = isAgreed,
+                onCheckedChange = onAgreedChange,
+                colors = CheckboxDefaults.colors(
+                    checkedColor = if (darkTheme) LumeaPinkDarkPrimary else LumeaPinkDark,
+                    uncheckedColor = if (darkTheme) Color.LightGray else Color.Gray,
+                    checkmarkColor = if (darkTheme) Color.Black else Color.White
+                )
             )
-        )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = buildAnnotatedString {
+                    append("By clicking the ")
+                    withStyle(style = SpanStyle(color = if (darkTheme) LumeaPinkDarkPrimary else LumeaPinkDark, fontWeight = FontWeight.Bold)) {
+                        append("Register")
+                    }
+                    append(" button, you agree to the ")
+                    withStyle(style = SpanStyle(color = if (darkTheme) LumeaPinkDarkPrimary else LumeaPinkDark, fontWeight = FontWeight.Bold)) {
+                        append("public offer")
+                    }
+                },
+                color = if (darkTheme) Color.White.copy(alpha = 0.8f) else Color.Gray.copy(alpha = 0.8f),
+                textAlign = TextAlign.Start, // Align to start
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.weight(1f) // Allow text to take remaining space
+            )
+        }
 
-        // Agreement Text
-        Text(
-            text = buildAnnotatedString {
-                append("By clicking the ")
-                withStyle(style = SpanStyle(color = if (darkTheme) LumeaPinkDarkPrimary else LumeaPinkDark, fontWeight = FontWeight.Bold)) {
-                    append("Register")
-                }
-                append(" button, you agree to the ")
-                withStyle(style = SpanStyle(color = if (darkTheme) LumeaPinkDarkPrimary else LumeaPinkDark, fontWeight = FontWeight.Bold)) {
-                    append("public offer")
-                }
-            },
-            color = if (darkTheme) Color.White.copy(alpha = 0.8f) else Color.Gray.copy(alpha = 0.8f),
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.padding(bottom = 24.dp)
-        )
-
-        // Create Account Button
+        // Create Account Button (enabled based on checkbox state)
         Button(
             onClick = onRegisterClick,
+            enabled = isAgreed, // Button is enabled only if checkbox is checked
             colors = ButtonDefaults.buttonColors(
-                containerColor = buttonContainerColor,
-                contentColor = buttonContentColor
+                containerColor = if (isAgreed) buttonContainerColor else MaterialTheme.colorScheme.surfaceVariant, // Gray when disabled
+                contentColor = if (isAgreed) buttonContentColor else MaterialTheme.colorScheme.onSurfaceVariant // Appropriate content color
             ),
             modifier = Modifier
                 .fillMaxWidth()
@@ -315,7 +370,7 @@ private fun PortraitSignupContent(
                 color = Color.White
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.ic_google), // Ensure this drawable exists
+                    painter = painterResource(id = R.drawable.ic_google),
                     contentDescription = "Sign in with Google",
                     modifier = Modifier.size(32.dp).wrapContentSize(align = Alignment.Center)
                 )
@@ -329,7 +384,7 @@ private fun PortraitSignupContent(
                 color = Color.White
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.ic_facebook), // Ensure this drawable exists
+                    painter = painterResource(id = R.drawable.ic_facebook),
                     contentDescription = "Sign in with Facebook",
                     modifier = Modifier.size(32.dp).wrapContentSize(align = Alignment.Center)
                 )
@@ -361,6 +416,8 @@ private fun LandscapeSignupContent(
     onPasswordChange: (String) -> Unit,
     confirmPassword: String,
     onConfirmPasswordChange: (String) -> Unit,
+    isAgreed: Boolean, // Added isAgreed state
+    onAgreedChange: (Boolean) -> Unit, // Added onAgreedChange callback
     onRegisterClick: () -> Unit,
     onGoogleSignInClick: () -> Unit,
     onFacebookSignInClick: () -> Unit,
@@ -377,17 +434,24 @@ private fun LandscapeSignupContent(
     val inputPlaceholderColor = if (darkTheme) Color.LightGray.copy(alpha = 0.7f) else Color.Gray.copy(alpha = 0.7f)
     val inputLabelColor = if (darkTheme) Color.White.copy(alpha = 0.8f) else Color.Gray.copy(alpha = 0.8f)
 
+    // State for password visibility
+    var passwordVisible by remember { mutableStateOf(false) }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
+
     // Using a Row to place title/agreement on left and inputs/buttons on right
     Row(
         modifier = Modifier
             .fillMaxSize()
-            .padding(32.dp),
+            .padding(24.dp), // Reduced overall padding to give more space
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Left Column: Title and Agreement Text
         Column(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight() // Make column fill height to center content
+                .verticalScroll(rememberScrollState()), // Make it scrollable
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -400,30 +464,53 @@ private fun LandscapeSignupContent(
                     .fillMaxWidth()
                     .padding(bottom = 16.dp) // Adjusted padding for landscape
             )
-            // Agreement Text
-            Text(
-                text = buildAnnotatedString {
-                    append("By clicking the ")
-                    withStyle(style = SpanStyle(color = if (darkTheme) LumeaPinkDarkPrimary else LumeaPinkDark, fontWeight = FontWeight.Bold)) {
-                        append("Register")
-                    }
-                    append(" button, you agree to the ")
-                    withStyle(style = SpanStyle(color = if (darkTheme) LumeaPinkDarkPrimary else LumeaPinkDark, fontWeight = FontWeight.Bold)) {
-                        append("public offer")
-                    }
-                },
-                color = if (darkTheme) Color.White.copy(alpha = 0.8f) else Color.Gray.copy(alpha = 0.8f),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
+
+            // Agreement Checkbox and Text
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp) // Added horizontal padding for text alignment
+                    .padding(bottom = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center // Center the checkbox and text
+            ) {
+                Checkbox(
+                    checked = isAgreed,
+                    onCheckedChange = onAgreedChange,
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = if (darkTheme) LumeaPinkDarkPrimary else LumeaPinkDark,
+                        uncheckedColor = if (darkTheme) Color.LightGray else Color.Gray,
+                        checkmarkColor = if (darkTheme) Color.Black else Color.White
+                    )
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = buildAnnotatedString {
+                        append("By clicking the ")
+                        withStyle(style = SpanStyle(color = if (darkTheme) LumeaPinkDarkPrimary else LumeaPinkDark, fontWeight = FontWeight.Bold)) {
+                            append("Register")
+                        }
+                        append(" button, you agree to the ")
+                        withStyle(style = SpanStyle(color = if (darkTheme) LumeaPinkDarkPrimary else LumeaPinkDark, fontWeight = FontWeight.Bold)) {
+                            append("public offer")
+                        }
+                    },
+                    color = if (darkTheme) Color.White.copy(alpha = 0.8f) else Color.Gray.copy(alpha = 0.8f),
+                    textAlign = TextAlign.Start,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.weight(1f) // Allow text to take remaining space
+                )
+            }
         }
 
-        Spacer(modifier = Modifier.width(32.dp))
+        Spacer(modifier = Modifier.width(24.dp)) // Adjusted spacer width
 
         // Right Column: Input Fields, Buttons, and Social Options
         Column(
-            modifier = Modifier.weight(1.5f),
+            modifier = Modifier
+                .weight(1.5f)
+                .fillMaxHeight() // Make column fill height to center content
+                .verticalScroll(rememberScrollState()), // Make it scrollable
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -460,7 +547,7 @@ private fun LandscapeSignupContent(
                 onValueChange = onPasswordChange,
                 label = { Text("Password") },
                 leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password Icon", tint = inputTextColor) },
-                visualTransformation = PasswordVisualTransformation(),
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 singleLine = true,
                 modifier = Modifier
@@ -481,7 +568,16 @@ private fun LandscapeSignupContent(
                     unfocusedLabelColor = inputPlaceholderColor,
                     focusedLeadingIconColor = inputTextColor,
                     unfocusedLeadingIconColor = inputTextColor
-                )
+                ),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                            contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                            tint = inputTextColor
+                        )
+                    }
+                }
             )
 
             OutlinedTextField(
@@ -489,7 +585,7 @@ private fun LandscapeSignupContent(
                 onValueChange = onConfirmPasswordChange,
                 label = { Text("Confirm Password") },
                 leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Confirm Password Icon", tint = inputTextColor) },
-                visualTransformation = PasswordVisualTransformation(),
+                visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 singleLine = true,
                 modifier = Modifier
@@ -510,15 +606,25 @@ private fun LandscapeSignupContent(
                     unfocusedLabelColor = inputPlaceholderColor,
                     focusedLeadingIconColor = inputTextColor,
                     unfocusedLeadingIconColor = inputTextColor
-                )
+                ),
+                trailingIcon = {
+                    IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                        Icon(
+                            imageVector = if (confirmPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                            contentDescription = if (confirmPasswordVisible) "Hide confirm password" else "Show confirm password",
+                            tint = inputTextColor
+                        )
+                    }
+                }
             )
 
-            // Create Account Button
+            // Create Account Button (enabled based on checkbox state)
             Button(
                 onClick = onRegisterClick,
+                enabled = isAgreed, // Button is enabled only if checkbox is checked
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = buttonContainerColor,
-                    contentColor = buttonContentColor
+                    containerColor = if (isAgreed) buttonContainerColor else MaterialTheme.colorScheme.surfaceVariant, // Gray when disabled
+                    contentColor = if (isAgreed) buttonContentColor else MaterialTheme.colorScheme.onSurfaceVariant // Appropriate content color
                 ),
                 modifier = Modifier
                     .fillMaxWidth()

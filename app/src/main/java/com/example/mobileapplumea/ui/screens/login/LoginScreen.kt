@@ -8,9 +8,12 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+// Import Material Icons for Visibility toggle
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -21,6 +24,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.IconButton // Import IconButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +35,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -64,9 +69,10 @@ fun LoginScreen(
     val backgroundBrush = if (darkTheme) {
         Brush.radialGradient(
             colors = listOf(
-                Color(0xFF5A4A5E), // A desaturated, muted purple-pink for a misty center glow
-                Color(0xFF3B2F3F), // Fades to a slightly darker, muted tone
-                LumeaBackgroundDark // Fades to the standard dark background
+                // Adjusted colors for a darker background
+                Color(0xFF38303C), // A very dark, subtle purple-pink for a faint central glow
+                Color(0xFF1A171B), // Fades to a slightly darker, near-black tone
+                LumeaBackgroundDark // Will be even darker, closer to pure black
             ),
             radius = 1600f // Larger radius for a softer, broader, more ethereal glow
         )
@@ -146,6 +152,9 @@ private fun PortraitLoginContent(
     val inputPlaceholderColor = if (darkTheme) Color.LightGray.copy(alpha = 0.7f) else Color.Gray.copy(alpha = 0.7f)
     val inputLabelColor = if (darkTheme) Color.White.copy(alpha = 0.8f) else Color.Gray.copy(alpha = 0.8f)
 
+    // State for password visibility
+    var passwordVisible by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -153,16 +162,16 @@ private fun PortraitLoginContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // App Logo/Image - MADE BIGGER
+        // App Logo/Image
         Image(
             painter = painterResource(id = R.drawable.ic_lumea_logo_circle), // Your circular logo image
             contentDescription = "Lumea App Logo",
             modifier = Modifier
-                .size(200.dp) // Increased size from 100.dp to 120.dp
+                .size(200.dp)
                 .padding(bottom = 16.dp)
         )
 
-        // LUMEA Text - Font Weight changed to Bold, slightly adjusted size
+        // LUMEA Text
         Box(
             modifier = Modifier
                 .wrapContentSize(align = Alignment.Center)
@@ -170,7 +179,7 @@ private fun PortraitLoginContent(
         ) {
             Text(
                 text = "LUMEA",
-                style = MaterialTheme.typography.displayLarge.copy(fontSize = 52.sp, fontWeight = FontWeight.Bold), // Changed to Bold, slightly smaller fontSize
+                style = MaterialTheme.typography.displayLarge.copy(fontSize = 52.sp, fontWeight = FontWeight.Bold),
                 color = LumeaPinkLight,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.graphicsLayer {
@@ -181,7 +190,7 @@ private fun PortraitLoginContent(
             )
             Text(
                 text = "LUMEA",
-                style = MaterialTheme.typography.displayLarge.copy(fontSize = 52.sp, fontWeight = FontWeight.Bold), // Changed to Bold, slightly smaller fontSize
+                style = MaterialTheme.typography.displayLarge.copy(fontSize = 52.sp, fontWeight = FontWeight.Bold),
                 color = LumeaPinkLight,
                 textAlign = TextAlign.Center
             )
@@ -196,7 +205,7 @@ private fun PortraitLoginContent(
             modifier = Modifier.padding(bottom = 24.dp)
         )
 
-        // Input Fields
+        // Username/Email Input Field
         OutlinedTextField(
             value = usernameOrEmail,
             onValueChange = onUsernameOrEmailChange,
@@ -225,12 +234,13 @@ private fun PortraitLoginContent(
             )
         )
 
+        // Password Input Field with eye toggle
         OutlinedTextField(
             value = password,
             onValueChange = onPasswordChange,
             label = { Text("Password") },
             leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password Icon", tint = inputTextColor) },
-            visualTransformation = PasswordVisualTransformation(),
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             singleLine = true,
             modifier = Modifier
@@ -251,7 +261,16 @@ private fun PortraitLoginContent(
                 unfocusedLabelColor = inputPlaceholderColor,
                 focusedLeadingIconColor = inputTextColor,
                 unfocusedLeadingIconColor = inputTextColor
-            )
+            ),
+            trailingIcon = {
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(
+                        imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                        contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                        tint = inputTextColor // Use inputTextColor for consistency
+                    )
+                }
+            }
         )
 
         // Forgot Password Link
@@ -379,11 +398,13 @@ private fun LandscapeLoginContent(
     val inputPlaceholderColor = if (darkTheme) Color.LightGray.copy(alpha = 0.7f) else Color.Gray.copy(alpha = 0.7f)
     val inputLabelColor = if (darkTheme) Color.White.copy(alpha = 0.8f) else Color.Gray.copy(alpha = 0.8f)
 
+    // State for password visibility
+    var passwordVisible by remember { mutableStateOf(false) }
 
     Row(
         modifier = Modifier
             .fillMaxSize()
-            .padding(32.dp),
+            .padding(24.dp), // Reduced overall padding
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -393,21 +414,21 @@ private fun LandscapeLoginContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // App Logo/Image - MADE BIGGER for Landscape
+            // App Logo/Image
             Image(
                 painter = painterResource(id = R.drawable.ic_lumea_logo_circle),
                 contentDescription = "Lumea App Logo",
-                modifier = Modifier.size(100.dp).padding(bottom = 8.dp)
+                modifier = Modifier.size(90.dp).padding(bottom = 4.dp) // Slightly smaller logo
             )
             // LUMEA Text for Landscape
             Box(
                 modifier = Modifier
                     .wrapContentSize(align = Alignment.Center)
-                    .padding(bottom = 8.dp)
+                    .padding(bottom = 4.dp) // Reduced padding
             ) {
                 Text(
                     text = "LUMEA",
-                    style = MaterialTheme.typography.displayMedium.copy(fontSize = 36.sp, fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.displayMedium.copy(fontSize = 32.sp, fontWeight = FontWeight.Bold), // Slightly smaller font
                     color = LumeaPinkLight,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.graphicsLayer {
@@ -418,26 +439,26 @@ private fun LandscapeLoginContent(
                 )
                 Text(
                     text = "LUMEA",
-                    style = MaterialTheme.typography.displayMedium.copy(fontSize = 36.sp, fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.displayMedium.copy(fontSize = 32.sp, fontWeight = FontWeight.Bold), // Slightly smaller font
                     color = LumeaPinkLight,
                     textAlign = TextAlign.Center
                 )
             }
             Text(
                 text = "Welcome Back!",
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.headlineSmall, // Smaller headline
                 color = if (darkTheme) Color.White else Color.Black.copy(alpha = 0.9f),
                 textAlign = TextAlign.Center
             )
         }
 
-        Spacer(modifier = Modifier.width(32.dp))
+        Spacer(modifier = Modifier.width(24.dp)) // Reduced spacer width
 
         // Right side: Login form and social options
         Column(
             modifier = Modifier.weight(1.5f),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.spacedBy(8.dp) // Use spacedBy for consistent spacing, reduced value
         ) {
             OutlinedTextField(
                 value = usernameOrEmail,
@@ -446,9 +467,7 @@ private fun LandscapeLoginContent(
                 leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Username/Email Icon", tint = inputTextColor) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 12.dp),
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = inputBorderColor,
@@ -467,17 +486,16 @@ private fun LandscapeLoginContent(
                 )
             )
 
+            // Password Input Field with eye toggle
             OutlinedTextField(
                 value = password,
                 onValueChange = onPasswordChange,
                 label = { Text("Password") },
                 leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password Icon", tint = inputTextColor) },
-                visualTransformation = PasswordVisualTransformation(),
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 6.dp),
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = inputBorderColor,
@@ -493,7 +511,16 @@ private fun LandscapeLoginContent(
                     unfocusedLabelColor = inputPlaceholderColor,
                     focusedLeadingIconColor = inputTextColor,
                     unfocusedLeadingIconColor = inputTextColor
-                )
+                ),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                            contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                            tint = inputTextColor // Use inputTextColor for consistency
+                        )
+                    }
+                }
             )
 
             Text(
@@ -501,7 +528,7 @@ private fun LandscapeLoginContent(
                 color = if (darkTheme) LumeaPinkLight.copy(alpha = 0.8f) else LumeaPinkDark.copy(alpha = 0.8f),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 24.dp)
+                    .padding(bottom = 4.dp) // Reduced padding
                     .clickable(onClick = onForgotPasswordClick),
                 textAlign = TextAlign.End,
                 style = MaterialTheme.typography.bodySmall
@@ -515,8 +542,7 @@ private fun LandscapeLoginContent(
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp)
-                    .padding(bottom = 16.dp),
+                    .height(48.dp), // Reduced button height
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text(
@@ -526,7 +552,7 @@ private fun LandscapeLoginContent(
             }
 
             Row(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
@@ -544,14 +570,14 @@ private fun LandscapeLoginContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 24.dp),
+                    .padding(vertical = 8.dp), // Adjusted vertical padding
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Google Icon
                 Surface(
                     modifier = Modifier
-                        .size(48.dp)
+                        .size(40.dp) // Reduced social icon size
                         .clickable(onClick = onGoogleSignInClick),
                     shape = RoundedCornerShape(50),
                     color = Color.White
@@ -559,13 +585,13 @@ private fun LandscapeLoginContent(
                     Image(
                         painter = painterResource(id = R.drawable.ic_google),
                         contentDescription = "Sign in with Google",
-                        modifier = Modifier.size(28.dp).wrapContentSize(align = Alignment.Center)
+                        modifier = Modifier.size(24.dp).wrapContentSize(align = Alignment.Center) // Adjusted image size within surface
                     )
                 }
                 // Facebook Icon
                 Surface(
                     modifier = Modifier
-                        .size(48.dp)
+                        .size(40.dp) // Reduced social icon size
                         .clickable(onClick = onFacebookSignInClick),
                     shape = RoundedCornerShape(50),
                     color = Color.White
@@ -573,11 +599,12 @@ private fun LandscapeLoginContent(
                     Image(
                         painter = painterResource(id = R.drawable.ic_facebook),
                         contentDescription = "Sign in with Facebook",
-                        modifier = Modifier.size(28.dp).wrapContentSize(align = Alignment.Center)
+                        modifier = Modifier.size(24.dp).wrapContentSize(align = Alignment.Center) // Adjusted image size within surface
                     )
                 }
             }
 
+            // Account Creation Prompt
             Text(
                 text = buildAnnotatedString {
                     append("Create An Account? ")
@@ -587,7 +614,7 @@ private fun LandscapeLoginContent(
                 },
                 color = if (darkTheme) Color.White.copy(alpha = 0.8f) else Color.Gray.copy(alpha = 0.8f),
                 modifier = Modifier.clickable(onClick = onCreateAccountClick),
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodySmall, // Slightly smaller text style
                 textAlign = TextAlign.Center
             )
         }
