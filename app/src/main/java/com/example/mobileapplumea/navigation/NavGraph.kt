@@ -216,8 +216,6 @@ fun LumeaNavGraph(navController: NavHostController) {
             )
         }
 
-        // Cart Screen
-        // Cart Screen
         composable(Screen.Cart.route) {
             CartScreen(
                 initialCartItems = dummyCartItems,

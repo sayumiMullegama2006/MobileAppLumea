@@ -60,7 +60,6 @@ fun PaymentScreen(
 
     val scrollState = rememberScrollState() // For vertical scrolling
 
-    // Dummy values for order summary (replace with real data from your cart/order ViewModel)
     val subtotal = 15000.00
     val shipping = 500.00
     val totalAmount = subtotal + shipping

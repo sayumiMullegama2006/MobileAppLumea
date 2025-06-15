@@ -192,7 +192,6 @@ fun ProductDetailScreen(
                 }
             }
         } else {
-            // Portrait Layout (existing code, wrapped in Box with padding)
             Box(
                 modifier = Modifier
                     .fillMaxSize()

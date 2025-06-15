@@ -37,14 +37,11 @@ fun GetStartedScreen(
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     val darkTheme = isSystemInDarkTheme()
 
-    // The background color of the Surface itself will adapt based on MaterialTheme.colorScheme.background
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
         // Background Image Layer (ensure R.drawable.background_get_started exists)
-        // You need to add an image named 'background_get_started.jpg' or similar to your drawable folder
-        // or change this to a solid color/gradient if you don't have an image.
         Image(
             painter = painterResource(id = R.drawable.background_get_started),
             contentDescription = null,
@@ -52,24 +49,11 @@ fun GetStartedScreen(
             contentScale = ContentScale.Crop
         )
 
-        // Overlay for text readability
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Black.copy(alpha = 0.3f), // Top fade
-                            Color.Black.copy(alpha = 0.5f)  // Bottom fade
-                        )
-                    )
-                )
-        ) {
-            if (isLandscape) {
-                LandscapeGetStartedContent(onGetStartedClick = onGetStartedClick)
-            } else {
-                PortraitGetStartedContent(onGetStartedClick = onGetStartedClick)
-            }
+
+        if (isLandscape) {
+            LandscapeGetStartedContent(onGetStartedClick = onGetStartedClick)
+        } else {
+            PortraitGetStartedContent(onGetStartedClick = onGetStartedClick)
         }
     }
 }
